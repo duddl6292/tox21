@@ -1,0 +1,92 @@
+{% extends "predictor/predictor_base.html" %}
+
+{% block predictor_content %}
+<style>
+    .sub-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 36px;
+    padding: 0 16px;
+
+    border: 1px solid #d9e1ec;
+    border-radius: 8px;
+
+    background-color: #ffffff;
+    color: #1f3a5f;
+
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.sub-action-btn:hover {
+    background-color: #f3f6fa;
+    border-color: #b8c7d9;
+    color: #172c47;
+    transform: translateY(-1px);
+}
+</style>
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">분석 히스토리</h2>
+        <p class="text-muted">
+            로그인한 사용자가 이전에 업로드한 분석 결과를 다시 확인할 수 있습니다.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+
+            {% if jobs %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>파일명</th>
+                                <th class="text-center">전체</th>
+                                <th class="text-center">성공</th>
+                                <th class="text-center">실패</th>
+                                <th class="text-center">분석 시간</th>
+                                <th class="text-center">결과</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for job in jobs %}
+                                <tr>
+                                    <td>{{ job.file_name }}</td>
+                                    <td class="text-center">{{ job.total_count }}</td>
+                                    <td class="text-center text-success fw-semibold">{{ job.success_count }}</td>
+                                    <td class="text-center text-danger fw-semibold">{{ job.error_count }}</td>
+                                    <td class="text-center">{{ job.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td class="text-center">
+                                        <a href="{% url 'predictor:result_list' job.id %}"
+                                           class="sub-action-btn">
+                                            결과 보기
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <p class="text-muted mb-3">아직 분석 기록이 없습니다.</p>
+                    <a href="{% url 'predictor:upload_csv' %}" class="btn btn-primary">
+                        CSV 분석하러 가기
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

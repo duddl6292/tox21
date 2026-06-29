@@ -1,0 +1,34 @@
+/* ==========================================================
+   로그인 페이지 로고 크기
+========================================================== */
+
+.login-logo img{
+
+    width:350px !important;
+    height:auto !important;
+
+}
+
+/* ==========================================
+   사이드바 로고
+========================================== */
+
+.brand-image{
+
+    max-height:42px !important;
+    width:auto !important;
+
+    margin-left:6px;
+    margin-right:10px;
+}
+
+/* Jazzmin 기본 로고 아이콘 숨기기 */
+.brand-link .brand-image {
+    display: none !important;
+}
+
+/* 로고가 없어졌을 때 텍스트 위치 보정 */
+.brand-link .brand-text {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}

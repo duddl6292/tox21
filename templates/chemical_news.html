@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+  <h2>화학 뉴스</h2>
+  <p class="sub-text">화학물질 독성 예측과 관련된 최신 뉴스입니다.</p>
+
+  <ul class="news-page-list">
+    {% for news in news_list %}
+      <li>
+        <span class="badge blue">{{ news.category }}</span>
+
+        <a href="{{ news.url }}" target="_blank">
+          {{ news.title }}
+        </a>
+
+        <em>{{ news.date }}</em>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>화학물질 독성예측 플랫폼</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1005">
+  <!--bootstrap CDN추가(predictor)-->
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">-->
+  {% block extra_css %}
+  {% endblock %}
+</head>
+<body>
+
+<div class="top-bar">
+  <div></div>
+
+  <div class="top-user-menu">
+    {% if user.is_authenticated %}
+      <span>{{ user.username }}님 환영합니다.</span>
+
+      <form method="post" action="{% url 'accounts:logout' %}" class="top-logout-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit">로그아웃</button>
+      </form>
+    {% else %}
+      <a href="{% url 'accounts:login' %}?next={{ request.get_full_path }}">로그인</a>
+      <a href="{% url 'accounts:signup' %}">회원가입</a>
+    {% endif %}
+  </div>
+</div>
+
+<nav class="navbar">
+  <div class="logo">
+    <a href="{% url 'home' %}" class="site-logo-link">
+      <img id="mainLogo" src="{% static 'images/mainlogo.png' %}" class="nav-logo-img show" alt="main logo">
+      <span>
+        화학물질 독성예측 플랫폼
+        <small>AI Toxicity Prediction Platform</small>
+      </span>
+    </a>
+  </div>
+   <!-- ############################################################################# -->
+  <div class="nav-menu">
+    <a href="{% url 'home' %}" class="active">홈</a>
+    <!-- <a href="#">CSV 독성 스크리닝</a>
+    <a href="#">구조 시각화</a>
+    <a href="#">구조 에디터</a>
+    <a href="#">화학 뉴스</a> -->
+    <a href="{% url 'introduce' %}">소개</a>
+    <!--<a href="{% url 'chemicals:chemical_list' %}">화학물질 검색</a> TEST URL로 수정 해주세요 -->
+    <!-- ############################################################################# -->
+    {% if user.is_staff %}
+      <a href="{% url 'admin:index' %}" class="admin-page-btn">관리자 페이지</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="container {% block container_class %}{% endblock %}">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="message">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% block content %}
+  {% endblock %}
+</div>
+<!--src추가(predictor)-->
+{% block extra_js %}
+{% endblock %}
+</body>
+</html>

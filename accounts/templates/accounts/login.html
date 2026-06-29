@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card small-card">
+  <h2>로그인</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn full-btn">로그인</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,690 @@
+{% extends "predictor/predictor_base.html" %}
+{% load static %}
+
+{% block predictor_content %}
+
+<style>
+    .csv-download-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0 24px;
+    }
+
+    .csv-filename-input {
+        width: 280px;
+        height: 42px;
+        padding: 0 15px;
+
+        border: 1px solid #d9e1ec;
+        border-radius: 9px;
+
+        background-color: #ffffff;
+        color: #1f2937;
+
+        font-size: 14px;
+        font-weight: 500;
+
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .csv-filename-input:focus {
+        border-color: #1f3a5f;
+        box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.12);
+    }
+
+    .csv-download-btn {
+        height: 42px;
+        padding: 0 20px;
+
+        border: 1px solid #1f3a5f;
+        border-radius: 9px;
+
+        background-color: #1f3a5f;
+        color: #ffffff;
+
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+
+        cursor: pointer;
+        white-space: nowrap;
+
+        box-shadow: 0 4px 10px rgba(31, 58, 95, 0.18);
+        transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    }
+
+    .csv-download-btn:hover {
+        background-color: #172c47;
+        border-color: #172c47;
+        box-shadow: 0 6px 14px rgba(31, 58, 95, 0.24);
+        transform: translateY(-1px);
+    }
+
+    .csv-download-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(31, 58, 95, 0.18);
+    }
+    .result-page {
+        max-width: 1220px;
+        margin: 0 auto;
+    }
+
+    /* 결과 테이블 */
+    .result-table {
+        width: 100%;
+        min-width: 1120px;
+        table-layout: fixed;
+        font-size: 14px;
+    }
+
+    .result-table th,
+    .result-table td {
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        padding: 10px 8px;
+    }
+
+    .result-table th {
+        font-weight: 800;
+        color: #0f3d67;
+    }
+
+    /* 컬럼 폭 고정 */
+    .result-table th:nth-child(1),
+    .result-table td:nth-child(1) {
+        width: 45px;
+    }
+
+    .result-table th:nth-child(2),
+    .result-table td:nth-child(2) {
+        width: 300px;
+    }
+
+    .result-table th:nth-child(3),
+    .result-table td:nth-child(3),
+    .result-table th:nth-child(7),
+    .result-table td:nth-child(7) {
+        width: 105px;
+    }
+
+    .result-table th:nth-child(4),
+    .result-table td:nth-child(4),
+    .result-table th:nth-child(8),
+    .result-table td:nth-child(8) {
+        width: 95px;
+    }
+
+    .result-table th:nth-child(5),
+    .result-table td:nth-child(5),
+    .result-table th:nth-child(9),
+    .result-table td:nth-child(9) {
+        width: 95px;
+    }
+
+    .result-table th:nth-child(6),
+    .result-table td:nth-child(6),
+    .result-table th:nth-child(10),
+    .result-table td:nth-child(10) {
+        width: 90px;
+    }
+
+    .input-cell {
+        text-align: left !important;
+        vertical-align: middle;
+        white-space: normal !important;
+    }
+
+    .input-cell .fw-semibold {
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 3px;
+    }
+
+    .smiles-text {
+        display: block;
+        font-family: Consolas, monospace;
+        max-width: 270px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
+    .risk-cell {
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .risk-low {
+        --bs-table-bg: #d1e7dd !important;
+        background-color: #d1e7dd !important;
+        color: #0f5132 !important;
+    }
+
+    .risk-mid {
+        --bs-table-bg: #fff3cd !important;
+        background-color: #fff3cd !important;
+        color: #664d03 !important;
+    }
+
+    .risk-high {
+        --bs-table-bg: #f8d7da !important;
+        background-color: #f8d7da !important;
+        color: #842029 !important;
+    }
+
+    .risk-invalid {
+        --bs-table-bg: #f1f3f5 !important;
+        background-color: #f1f3f5 !important;
+        color: #212529 !important;
+    }
+
+    /* 필터 카드 */
+    .filter-card {
+        background: #ffffff;
+        border: 1px solid #e5eaf3;
+        border-radius: 18px;
+        padding: 24px 28px;
+        margin: 28px 0 22px;
+        box-shadow: 0 8px 24px rgba(15, 35, 75, 0.06);
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .filter-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .filter-desc {
+        font-size: 13px;
+        color: #7b8794;
+    }
+
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .filter-btn {
+        border: 1px solid #d8e1ef;
+        background: #f8fafc;
+        color: #334155;
+        border-radius: 999px;
+        padding: 9px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+
+    .filter-btn:hover {
+        transform: translateY(-1px);
+        background: #eef5ff;
+        border-color: #9cc4ff;
+        color: #0b63ce;
+    }
+
+    .filter-btn.active {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: #ffffff;
+        box-shadow: 0 6px 14px rgba(13, 110, 253, 0.25);
+    }
+
+    .filter-btn.filter-low {
+        color: #0f766e;
+    }
+
+    .filter-btn.filter-mid {
+        color: #b45309;
+    }
+
+    .filter-btn.filter-high {
+        color: #b91c1c;
+    }
+
+    .filter-btn.filter-invalid {
+        color: #475569;
+    }
+
+    .filter-btn.filter-low.active {
+        background: #16a34a;
+        border-color: #16a34a;
+        color: #ffffff;
+    }
+
+    .filter-btn.filter-mid.active {
+        background: #f59e0b;
+        border-color: #f59e0b;
+        color: #ffffff;
+    }
+
+    .filter-btn.filter-high.active {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #ffffff;
+    }
+
+    .filter-btn.filter-invalid.active {
+        background: #475569;
+        border-color: #475569;
+        color: #ffffff;
+    }
+
+    .result-note {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 10px;
+    }
+    .back-analyze-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 42px;
+    padding: 0 22px;
+
+    border: 1px solid #d9e1ec;
+    border-radius: 9px;
+
+    background-color: #ffffff;
+    color: #1f3a5f;
+
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 8px rgba(15, 39, 66, 0.08);
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+    }   
+
+    .back-analyze-btn:hover {
+        background-color: #f3f6fa;
+        border-color: #b8c7d9;
+        color: #172c47;
+        text-decoration: none;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 12px rgba(15, 39, 66, 0.12);
+    }
+
+    .back-analyze-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(15, 39, 66, 0.08);
+    }
+    .login-alert {
+    width: 100%;
+    max-width: 470px;
+
+    margin: 16px 0 24px;
+    padding: 12px 18px;
+
+    background-color: #f8d7da;
+    color: #842029;
+
+    border: 1px solid #f1c6cc;
+    border-radius: 6px;
+
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    }
+
+    .login-alert a {
+        color: #842029;
+        font-weight: 800;
+        text-decoration: underline;
+    }
+
+    .login-alert a:hover {
+        color: #5c151c;
+    }
+</style>
+
+<div class="container mt-4 result-page">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">분석 결과</h2>
+
+        <p class="text-muted mb-1">
+            파일명: {{ job.file_name }}
+        </p>
+
+        <p class="text-muted mb-2">
+            분석 시간: {{ job.created_at|date:"Y-m-d H:i" }}
+        </p>
+
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'predictor:download_result_csv' job.id %}">
+                {% csrf_token %}
+
+                <div class="csv-download-area">
+                    <input type="text"
+                        name="filename"
+                        class="csv-filename-input"
+                        placeholder="저장할 파일명 입력"
+                        value="tox21_analysis_{{ job.id }}">
+
+                    <button type="submit" class="csv-download-btn">
+                        CSV 다운로드
+                    </button>
+                </div>
+            </form>
+        {% else %}
+    <p class="login-alert">
+        🔒 다운로드는 
+        <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}">
+            로그인
+        </a> 
+        후 가능합니다.
+    </p>
+{% endif %}
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <div class="text-muted small">전체 분석 수</div>
+                    <div class="fs-3 fw-bold">
+                        {{ summary.total|default:job.total_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <div class="text-muted small">성공</div>
+                    <div class="fs-3 fw-bold text-success">
+                        {{ summary.success|default:job.success_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <div class="text-muted small">분석 불가</div>
+                    <div class="fs-3 fw-bold text-danger">
+                        {{ summary.error|default:job.error_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <div class="text-muted small">ML 예측 포함</div>
+                    <div class="fs-3 fw-bold text-primary">
+                        {{ summary.ml_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">NR-ER 위험도 요약</h5>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge bg-success">
+                            저위험 {{ summary.nr_er_low }}
+                        </span>
+
+                        <span class="badge bg-warning text-dark">
+                            중위험 {{ summary.nr_er_mid }}
+                        </span>
+
+                        <span class="badge bg-danger">
+                            고위험 {{ summary.nr_er_high }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">SR-p53 위험도 요약</h5>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge bg-success">
+                            저위험 {{ summary.sr_p53_low }}
+                        </span>
+
+                        <span class="badge bg-warning text-dark">
+                            중위험 {{ summary.sr_p53_mid }}
+                        </span>
+
+                        <span class="badge bg-danger">
+                            고위험 {{ summary.sr_p53_high }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-card">
+        <div class="filter-header">
+            <span class="filter-title">결과 필터</span>
+            <span class="filter-desc">위험도 기준으로 결과를 빠르게 확인합니다.</span>
+        </div>
+
+        <div class="filter-buttons">
+            <button type="button"
+                    class="filter-btn active"
+                    onclick="filterRows('all', this)">
+                전체
+            </button>
+
+            <button type="button"
+                    class="filter-btn filter-low"
+                    onclick="filterRows('저위험', this)">
+                저위험
+            </button>
+
+            <button type="button"
+                    class="filter-btn filter-mid"
+                    onclick="filterRows('중위험', this)">
+                중위험
+            </button>
+
+            <button type="button"
+                    class="filter-btn filter-high"
+                    onclick="filterRows('고위험', this)">
+                고위험
+            </button>
+
+            <button type="button"
+                    class="filter-btn filter-invalid"
+                    onclick="filterRows('분석 불가', this)">
+                분석 불가
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm result-table">
+            <thead class="table-light">
+                <tr>
+                    <th>No</th>
+                    <th>Input</th>
+
+                    <th>NR-ER Source</th>
+                    <th>NR-ER Result</th>
+                    <th>NR-ER Prob</th>
+                    <th>NR-ER Risk</th>
+
+                    <th>SR-p53 Source</th>
+                    <th>SR-p53 Result</th>
+                    <th>SR-p53 Prob</th>
+                    <th>SR-p53 Risk</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for result in results %}
+                    <tr class="result-row"
+                        data-nr-risk="{{ result.nr_er_risk }}"
+                        data-sr-risk="{{ result.sr_p53_risk }}">
+
+                        <td>{{ result.row_number }}</td>
+
+                        <td class="input-cell">
+                            {% if result.resolved_name %}
+                                <div class="fw-semibold">
+                                    {{ result.resolved_name }}
+                                </div>
+
+                                {% if result.input_smiles %}
+                                    <div class="text-muted small smiles-text" title="{{ result.input_smiles }}">
+                                        SMILES: {{ result.input_smiles }}
+                                    </div>
+                                {% endif %}
+
+                            {% elif result.input_name %}
+                                <div class="fw-semibold">
+                                    {{ result.input_name }}
+                                </div>
+
+                                <div class="text-muted small">
+                                    SMILES 변환 실패
+                                </div>
+
+                            {% elif result.input_smiles %}
+                                <div class="smiles-text" title="{{ result.input_smiles }}">
+                                    {{ result.input_smiles }}
+                                </div>
+
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if result.nr_er_source == "DB" %}
+                                <span class="badge bg-primary">DB</span>
+                            {% elif result.nr_er_source == "ML" %}
+                                <span class="badge bg-secondary">ML</span>
+                            {% elif result.nr_er_source == "INVALID" %}
+                                <span class="badge bg-danger">INVALID</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ result.nr_er_result|default_if_none:"-" }}</td>
+                        <td>{{ result.nr_er_prob|default_if_none:"-" }}</td>
+
+                        <td class="risk-cell
+                            {% if result.nr_er_risk == '저위험' %}risk-low
+                            {% elif result.nr_er_risk == '중위험' %}risk-mid
+                            {% elif result.nr_er_risk == '고위험' %}risk-high
+                            {% elif result.nr_er_risk == '분석 불가' %}risk-invalid
+                            {% endif %}
+                        ">
+                            {{ result.nr_er_risk }}
+                        </td>
+
+                        <td>
+                            {% if result.sr_p53_source == "DB" %}
+                                <span class="badge bg-primary">DB</span>
+                            {% elif result.sr_p53_source == "ML" %}
+                                <span class="badge bg-secondary">ML</span>
+                            {% elif result.sr_p53_source == "INVALID" %}
+                                <span class="badge bg-danger">INVALID</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ result.sr_p53_result|default_if_none:"-" }}</td>
+                        <td>{{ result.sr_p53_prob|default_if_none:"-" }}</td>
+
+                        <td class="risk-cell
+                            {% if result.sr_p53_risk == '저위험' %}risk-low
+                            {% elif result.sr_p53_risk == '중위험' %}risk-mid
+                            {% elif result.sr_p53_risk == '고위험' %}risk-high
+                            {% elif result.sr_p53_risk == '분석 불가' %}risk-invalid
+                            {% endif %}
+                        ">
+                            {{ result.sr_p53_risk }}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10">
+                            분석 결과가 없습니다.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="result-note">
+        Source가 <strong>ML</strong>인 경우 모델 예측값이며,
+        <strong>INVALID</strong>는 입력값 변환 또는 SMILES 검증에 실패한 항목입니다.
+    </p>
+
+    <a href="{% url 'predictor:upload_csv' %}" class="back-analyze-btn">
+        다른 CSV 분석하기
+    </a>
+</div>
+
+<script>
+    function filterRows(risk, clickedButton) {
+        const rows = document.querySelectorAll(".result-row");
+        const buttons = document.querySelectorAll(".filter-btn");
+
+        buttons.forEach(function(button) {
+            button.classList.remove("active");
+        });
+
+        if (clickedButton) {
+            clickedButton.classList.add("active");
+        }
+
+        rows.forEach(function(row) {
+            const nrRisk = row.dataset.nrRisk;
+            const srRisk = row.dataset.srRisk;
+
+            if (risk === "all") {
+                row.style.display = "";
+            } else if (nrRisk === risk || srRisk === risk) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>
+
+{% endblock predictor_content %}

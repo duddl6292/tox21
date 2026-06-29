@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card small-card">
+  <h2>회원 삭제</h2>
+
+  <p>
+    <b>{{ user_obj.username }}</b> 회원을 삭제하시겠습니까?
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">삭제</button>
+    <a href="{% url 'accounts:admin_user_detail' user_obj.pk %}" class="btn btn-gray">취소</a>
+  </form>
+</div>
+{% endblock %}

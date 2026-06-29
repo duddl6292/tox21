@@ -1,0 +1,90 @@
+{% extends "predictor/predictor_base.html" %}
+
+{% block predictor_content %}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">모델 및 서비스 설명</h2>
+        <p class="text-muted">
+            본 서비스는 Tox21 데이터를 기반으로 화합물의 NR-ER 및 SR-p53 독성 위험도를 분석합니다.
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">분석 대상</h4>
+                    <p>
+                        본 프로젝트는 Tox21 데이터셋 중
+                        <strong>NR-ER</strong>과 <strong>SR-p53</strong> 타깃을 사용합니다.
+                    </p>
+
+                    <ul>
+                        <li><strong>NR-ER</strong>: 에스트로겐 수용체 관련 활성 여부</li>
+                        <li><strong>SR-p53</strong>: p53 스트레스 반응 관련 활성 여부</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">입력 데이터</h4>
+                    <p>
+                        사용자는 <strong>SMILES</strong> 또는 <strong>화합물명</strong>을 입력할 수 있습니다.
+                        화합물명 입력 시 PubChem API를 통해 SMILES로 변환한 뒤 분석합니다.
+                    </p>
+
+                    <ul>
+                        <li>SMILES 입력: 바로 RDKit으로 구조 변환</li>
+                        <li>화합물명 입력: PubChem API로 SMILES 조회</li>
+                        <li>유효하지 않은 입력: 분석 불가 처리</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">특징 추출</h4>
+                    <p>
+                        분자 구조는 RDKit을 이용해 수치형 특징으로 변환됩니다.
+                    </p>
+
+                    <ul>
+                        <li>Morgan Fingerprint</li>
+                        <li>2D Molecular Descriptor</li>
+                        <li>Canonical SMILES 기반 DB 조회</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">분석 방식</h4>
+                    <p>
+                        입력 화합물이 Tox21 DB에 존재하면 실제 라벨을 우선 제공하고,
+                        DB에 없는 화합물은 학습된 머신러닝 모델로 예측합니다.
+                    </p>
+
+                    <ul>
+                        <li><span class="badge bg-primary">DB</span> 실제 Tox21 라벨 사용</li>
+                        <li><span class="badge bg-secondary">ML</span> 모델 예측값 사용</li>
+                        <li><span class="badge bg-danger">INVALID</span> 분석 불가 입력</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+﻿smiles,name
+CCOc1ccc2nc(S(N)(=O)=O)sc2c1,ethoxzolamide
+CCN1C(=O)NC(c2ccccc2)C1=O,ethotoin
+CC[C@]1(O)CC[C@H]2[C@@H]3CCC4=CCCC[C@@H]4[C@H]3CC[C@@]21C,ethylestrenol
+CCCN(CC)C(CC)C(=O)Nc1c(C)cccc1C,Etidocaine
+CC(O)(P(=O)(O)O)P(=O)(O)O,Etidronic acid
+CC(C)(C)OOC(C)(C)CCC(C)(C)OOC(C)(C)C,"2,5-Dimethyl-2,5-di(tert-butylperoxy)hexane"
+O=S(=O)(Cl)c1ccccc1,BENZENESULFONYL CHLORIDE
+O=C(O)Cc1cc(I)c(Oc2ccc(O)c(I)c2)c(I)c1,Tiratricol
+OC[C@@H](O)[C@H](O)[C@@H](O)CO,"(2S,4R)-pentane-1,2,3,4,5-pentol"
+CCCCCCCC(=O)[O-].CCCCCCCC(=O)[O-].[Zn+2],"Octanoic acid, zinc salt"
+NC(=O)c1ccc[n+]([C@@H]2O[C@H](COP(=O)([O-])OP(=O)(O)OC[C@H]3O[C@@H](n4cnc5c(N)ncnc54)[C@H](O)[C@@H]3O)[C@@H](O)[C@H]2O)c1,nadide
+O=c1[nH]c(=O)n([C@H]2C[C@H](O)[C@@H](CO)O2)cc1I,idoxuridine
+CC(C)COC(=O)C(C)C,Isobutyl isobutyrate
+C=C(C)C(=O)OCCOC(=O)C(=C)C,Ethylene glycol dimethacrylate
+Cl/C=C\C[N+]12CN3CN(CN(C3)C1)C2,Chloroallyl methenamine
+O=C([O-])Cc1cccc2ccccc12,1-Naphthylacetate
+CCCCCCCCCCOCC(O)CN,Decominol
+CCN(CC)C(=O)c1cccnc1,Nikethamide
+COc1cc(O)cc(O)c1,5-Methoxyresorcinol
+CCOC(=O)c1cccnc1,Ethyl nicotinate
+CCOc1ccc(S(=O)(=O)O)c2cccnc12,Actinoquinol
+O=C(O)[C@H](O)c1ccccc1,(r)-mandelic acid
+Nc1ccc(/N=N/c2ccccc2)cc1,4-Aminoazobenzene
+CN[C@@H]1C[C@@H](c2ccc(Cl)c(Cl)c2)c2ccccc21,Indatraline
+CN1[C@@H]2CC[C@H]1C[C@@H](OC(=O)c1cc(Cl)cc(Cl)c1)C2,Bemesetron (USAN/INN)
+CN(C)CCCN1c2ccccc2CCc2ccc(Cl)cc21,clomipramine
+C#CCO,PROPARGYL ALCOHOL
+Nc1ccccc1S(=O)(=O)O,2-Aminobenzenesulfonic acid
+CC(O)CC(C)(C)O,Hexylene glycol
+CC(C)(C)CC(C)(C)N,tert-Octylamine
+CC(=O)CC(C)C,4-Methyl-2-pentanone
+CCCC(C)=O,2-Pentanone
+Nc1nc2ccccc2[nH]1,2-AMINOBENZIMIDAZOLE
+Oc1c(Cl)c(Cl)c(Cl)c(Cl)c1Cl,pentachlorophenol
+c1ccc(-c2ccccc2)cc1,Biphenyl
+CNC(=O)Nc1ccc(Cl)c(Cl)c1,"1-(3,4-Dichlorophenyl)-3-methylurea"
+CC(=O)Nc1ccc(C)c(Cl)c1,N-(3-Chloro-4-methylphenyl)acetamide
+CCCCNC(=S)NCCCC,"1,3-Dibutyl-2-thiourea"
+CCCCNC(=O)NCCCC,"N,N'-Dibutylurea"
+CC(C)N(c1ccccc1)C(C)C,"N,N-DIISOPROPYLANILINE"
+CCc1cccc(C)c1,3-Ethyltoluene
+CC(C)CCCCCCCOP(OCCCCCCCC(C)C)Oc1ccccc1,Diisodecyl phenyl phosphite
+CCCCCCCC/C=C\CCCCCCCC(=O)OC(CO)CO,2-Monoolein
+CCCCCCCCCCC=CC1CC(=O)OC1=O,RefChem:1066382
+CC(C)C(Nc1ccc(C(F)(F)F)cc1Cl)C(=O)OC(C#N)c1cccc(Oc2ccccc2)c1,FLUVALINATE
+CS(=O)(=O)NC(=O)c1cc(Oc2ccc(C(F)(F)F)cc2Cl)ccc1[N+](=O)[O-],Fomesafen
+CCOP(=S)(CC)Sc1ccccc1,Fonofos
+CC/C=C\CCCCO,cis-5-Octen-1-ol
+Nc1ccccc1C(=O)Oc1ccc2ccccc2c1,naphthalen-2-yl 2-aminobenzoate
+C=C[C@H]1CN2CCC1C[C@H]2[C@H](O)c1ccnc2ccc(OC)cc12,Quininae

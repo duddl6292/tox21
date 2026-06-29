@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+  <h2>Django Admin 대시보드</h2>
+  <p class="sub-text">Tox21 관리자 전용 데이터 관리 화면입니다.</p>
+
+  <div class="grid-box">
+    <div class="info-card">
+      <h3>전체 회원</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ user_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>관리자 수</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ staff_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>화학식 데이터</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ chemical_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>카테고리</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ category_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Endpoint</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ endpoint_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>예측 이력</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ prediction_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>CSV 업로드</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ csv_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>공지사항</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ notice_count }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>미답변 문의</h3>
+      <p style="font-size: 34px; font-weight: 900;">{{ unanswered_count }}</p>
+    </div>
+  </div>
+
+  <br>
+
+  <a href="/admin/" class="btn">Django Admin 접속</a>
+  <a href="/admin/auth/user/" class="btn btn-gray">회원 관리</a>
+  <a href="/admin/chemicals/chemical/" class="btn btn-gray">화학식 관리</a>
+  <a href="/admin/chemicals/predictionhistory/" class="btn btn-gray">예측 이력</a>
+  <a href="/admin/chemicals/inquiry/" class="btn btn-gray">문의 관리</a>
+</div>
+
+{% endblock %}

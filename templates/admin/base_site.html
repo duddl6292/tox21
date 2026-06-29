@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}" style="text-decoration:none; color:white;">
+        🧪 TOX SEARCH
+    </a>
+</h1>
+
+<p style="color:white; margin-top:5px; font-size:13px;">
+    AI Toxicity Prediction Platform
+</p>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

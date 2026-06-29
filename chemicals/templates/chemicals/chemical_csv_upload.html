@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card small-card">
+  <h2>CSV 업데이트</h2>
+
+  <p class="sub-text">
+    CSV 컬럼명은 name, formula, smiles, toxicity, description 형식이어야 합니다.
+  </p>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn full-btn">CSV 업로드</button>
+    <a href="{% url 'chemicals:chemical_list' %}" class="btn btn-gray">목록</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+  <h2>관리자 회원관리</h2>
+  <p class="sub-text">신규가입자와 기존가입자 전체를 확인할 수 있습니다.</p>
+
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>아이디</th>
+      <th>이메일</th>
+      <th>관리자</th>
+      <th>가입일</th>
+      <th>관리</th>
+    </tr>
+
+    {% for user_obj in users %}
+    <tr>
+      <td>{{ user_obj.id }}</td>
+      <td>{{ user_obj.username }}</td>
+      <td>{{ user_obj.email }}</td>
+      <td>
+        {% if user_obj.is_staff %}
+          관리자
+        {% else %}
+          일반회원
+        {% endif %}
+      </td>
+      <td>{{ user_obj.date_joined|date:"Y-m-d H:i" }}</td>
+      <td>
+        <a href="{% url 'accounts:admin_user_detail' user_obj.pk %}" class="btn table-btn">상세</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

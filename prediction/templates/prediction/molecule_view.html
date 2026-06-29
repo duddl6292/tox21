@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://3dmol.org/build/3Dmol-min.js"></script>
+
+<style>
+    .visualize-wrapper { padding: 30px; background-color: #f4f7f6; height: auto; padding-bottom: 40px; border-radius: 0 0 15px 15px; }
+    .header-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; margin-bottom: 25px; }
+    .smiles-text { background-color: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 16px; color: #333; margin-top: 10px; word-break: break-all; border: 1px solid #e9ecef; }
+    .flex-grid { display: flex; gap: 25px; flex-wrap: wrap; }
+    .view-card { flex: 1; min-width: 45%; background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; }
+    .view-title { color: #2c3e50; font-size: 18px; font-weight: 700; margin-top: 0; margin-bottom: 20px; width: 100%; border-bottom: 2px solid #f1f3f5; padding-bottom: 10px; }
+    .canvas-container { width: 100%; height: 350px; background-color: white; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    
+    .btn-group { display: flex; gap: 10px; width: 100%; justify-content: center; }
+    .btn-dl { padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.2s; border: none; cursor: pointer; text-align: center; }
+    .btn-png { background-color: #e8f4ff; color: #0d6efd; }
+    .btn-png:hover { background-color: #0d6efd; color: white; }
+    .btn-jpg { background-color: #fff3cd; color: #856404; }
+    .btn-jpg:hover { background-color: #ffc107; color: black; }
+    .btn-3d { background-color: #d1e7dd; color: #0f5132; width: 100%; }
+    .btn-3d:hover { background-color: #198754; color: white; }
+    .btn-back { display: inline-block; background-color: #6c757d; color: white; padding: 10px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 30px; transition: 0.2s; }
+    .btn-back:hover { background-color: #5c636a; }
+    .login-alert { width: 100%; text-align: center; color: #dc3545; font-size: 13px; font-weight: bold; padding: 10px; background-color: #f8d7da; border-radius: 6px; margin: 0; }
+</style>
+
+<div class="visualize-wrapper">
+    <div class="header-card">
+        <h2 style="margin: 0; color: #2c3e50; font-weight: 800;">🧬 분자 구조 상세 시각화</h2>
+        <div class="smiles-text">{{ smiles }}</div>
+    </div>
+
+    {% if error %}
+        <div style="background-color: #f8d7da; color: #842029; padding: 20px; border-radius: 8px; text-align: center; font-weight: bold;">
+            ❌ {{ error }}
+        </div>
+    {% else %}
+    <div class="flex-grid">
+        <div class="view-card">
+            <div class="view-title">2D 구조 모형</div>
+            <div class="canvas-container">
+                <img src="{% url 'prediction:download_2d' %}?smiles={{ smiles|urlencode }}&format=png" alt="2D Molecule" style="max-width: 90%; max-height: 90%;">
+            </div>
+            
+            <div class="btn-group">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'prediction:download_2d' %}?smiles={{ smiles|urlencode }}&format=png" class="btn-dl btn-png" style="flex:1;">PNG 다운로드</a>
+                    <a href="{% url 'prediction:download_2d' %}?smiles={{ smiles|urlencode }}&format=jpg" class="btn-dl btn-jpg" style="flex:1;">JPG 다운로드</a>
+                {% else %}
+                    <p class="login-alert">🔒 다운로드는 <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" style="color:#842029; text-decoration:underline;">로그인</a> 후 가능합니다.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="view-card">
+            <div class="view-title">3D 입체 모형 (드래그 회전)</div>
+            <div id="molecule-3d" class="canvas-container"></div>
+            
+            <div class="btn-group">
+                {% if user.is_authenticated %}
+                    <button class="btn-dl btn-3d" onclick="download3DImage()">3D 화면 캡처 다운로드 (PNG)</button>
+                {% else %}
+                    <p class="login-alert">🔒 다운로드는 <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" style="color:#842029; text-decoration:underline;">로그인</a> 후 가능합니다.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div style="text-align: center;">
+        <a href="javascript:history.back()" class="btn-back">⬅ 목록으로 돌아가기</a>
+    </div>
+</div>
+
+<script>
+    const sdfData = `{{ sdf_block|safe }}`;
+    let viewer = null;
+
+    $(document).ready(function() {
+        if (sdfData && sdfData !== "None") {
+            let element = $('#molecule-3d');
+            let config = { backgroundColor: 'white', preserveDrawingBuffer: true };
+            viewer = $3Dmol.createViewer(element, config);
+            
+            viewer.addModel(sdfData, "sdf");
+            viewer.setStyle({}, {sphere: {radius: 0.4}, stick: {radius: 0.15}});
+            viewer.zoomTo();
+            viewer.render();
+        }
+    });
+
+    function download3DImage() {
+        if (!viewer) return;
+        try {
+            const imgData = viewer.pngURI();
+            const link = document.createElement('a');
+            link.download = 'molecule_3d_capture.png';
+            link.href = imgData;
+            link.click();
+        } catch (e) {
+            alert("이미지 캡처 중 오류가 발생했습니다.");
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* 전체 레이아웃 래퍼 */
+    .search-page-wrapper { padding: 30px; background-color: #f4f7f6; height: auto; padding-bottom: 40px; border-radius: 0 0 15px 15px; }
+    .page-title { margin-top: 0; color: #2c3e50; font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+    
+    /* 검색창 카드 */
+    .search-box-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .search-form-flex { display: flex; gap: 10px; }
+    .search-input-modern { flex: 1; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; outline: none; }
+    .search-btn-modern { padding: 0 35px; background-color: #0d6efd; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
+    
+    /* 검색결과 박스 고정크기 제거 -> height auto로 검색량에 따라 늘어나게 설정 */
+    .result-card { background: white; padding: 0; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; margin-top: 15px; height: auto; }
+    
+    .modern-table { width: 100%; border-collapse: collapse; text-align: center; }
+    .modern-table th { background-color: #f8f9fa; padding: 16px 20px; color: #495057; font-weight: 600; border-bottom: 2px solid #e9ecef; }
+    .modern-table td { padding: 16px 20px; border-bottom: 1px solid #f1f3f5; color: #333; vertical-align: middle; font-size: 15px; }
+    .modern-table tr:hover { background-color: #fdfdfd; }
+    
+    .badge-src { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+    .btn-action-modern { display: inline-block; background-color: #e8f4ff; color: #0d6efd; padding: 8px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; }
+    .btn-action-modern:hover { background-color: #0d6efd; color: white; }
+
+    /* 페이징 컨트롤러 */
+    .pagination-wrap { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; padding-bottom: 20px; }
+    .page-info { font-size: 14px; color: #6c757d; font-weight: 600; }
+    .slide-btns { display: flex; gap: 5px; }
+    .slide-btns a, .slide-btns span { 
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 36px; height: 36px; border: 1px solid #dee2e6; background-color: white;
+        border-radius: 4px; text-decoration: none; color: #495057; font-size: 18px; font-weight: bold; cursor: pointer;
+    }
+    .slide-btns a:hover { background-color: #0d6efd; color: white; border-color: #0d6efd; }
+    .slide-btns .disabled { background-color: #e9ecef; color: #adb5bd; cursor: not-allowed; }
+</style>
+
+<div class="search-page-wrapper">
+    <h2 class="page-title">🧪 화합물 통합 검색</h2>
+
+    <div class="search-box-card">
+        <form method="get" action="{% url 'prediction:search' %}" class="search-form-flex">
+            <input type="text" name="query" value="{{ query }}" class="search-input-modern" placeholder="화합물명(예: Aspirin, ch) 또는 SMILES 구조식을 입력하세요" required>
+            <button type="submit" class="search-btn-modern">검색</button>
+        </form>
+        {% if error_message %}
+            <p style="color: #dc3545; font-weight: bold; margin-top: 15px; margin-bottom: 0;">❌ {{ error_message }}</p>
+        {% endif %}
+    </div>
+
+    {% if query and not error_message %}
+        <div class="badge-src" style="background-color: {% if search_mode == 'PubChem API' %}#cff4fc; color: #055160;{% else %}#d1e7dd; color: #0f5132;{% endif %}">
+            검색 출처: {{ search_mode }}
+        </div>
+
+        <div class="result-card">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%; text-align: left; padding-left: 25px;">화학물질명</th>
+                        <th style="text-align: left; width: 45%;">표준 SMILES</th>
+                        <th>NR-ER</th>
+                        <th>SR-p53</th>
+                        <th>구조 모형</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mol in page_obj %}
+                    <tr>
+                        <td style="font-weight: 600; text-align: left; padding-left: 25px; color: #2c3e50;">
+                            {{ mol.compound_name }}
+                        </td>
+                        <td style="text-align: left; font-family: monospace; color: #555; word-break: break-all;">
+                            {{ mol.canonical_smiles }}
+                        </td>
+                        <td>
+                            {% if mol.nr_er_true == 1 %}<span style="color:#dc3545; font-weight:bold;">1</span>
+                            {% elif mol.nr_er_true == 0 %}<span style="color:#198754;">0</span>
+                            {% else %}{{ mol.nr_er_true|default:"-" }}{% endif %}
+                        </td>
+                        <td>
+                            {% if mol.sr_p53_true == 1 %}<span style="color:#dc3545; font-weight:bold;">1</span>
+                            {% elif mol.sr_p53_true == 0 %}<span style="color:#198754;">0</span>
+                            {% else %}{{ mol.sr_p53_true|default:"-" }}{% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'prediction:visualize' %}?smiles={{ mol.canonical_smiles|urlencode }}" class="btn-action-modern">
+                                🎨 2D/3D 보기
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" style="padding: 30px; color: #777;">검색 결과가 없습니다.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if search_mode == "로컬 Tox21 DB" and page_obj.has_other_pages %}
+        <div class="pagination-wrap">
+            <div class="page-info">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 페이지
+            </div>
+            <div class="slide-btns">
+                {% if page_obj.has_previous %}
+                    <a href="?query={{ query|urlencode }}&page={{ page_obj.previous_page_number }}">‹</a>
+                {% else %}
+                    <span class="disabled">‹</span>
+                {% endif %}
+
+                {% if page_obj.has_next %}
+                    <a href="?query={{ query|urlencode }}&page={{ page_obj.next_page_number }}">›</a>
+                {% else %}
+                    <span class="disabled">›</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+    {% endif %}
+</div>
+{% endblock %}

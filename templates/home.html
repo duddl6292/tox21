@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block container_class %}home-container{% endblock %}
+
+{% block content %}
+
+<!-- 인트로 화면 ######################################################################## -->
+<div id="intro-screen">
+  <div class="intro-stage">
+
+    <div class="intro-piece piece-1">⬡</div>
+    <div class="intro-piece piece-2">⌕</div>
+    <div class="intro-piece piece-3">✣</div>
+    <div class="intro-piece piece-4">▪ ▪ ▪</div>
+    <div class="intro-piece piece-5">➜</div>
+    <div class="intro-piece piece-6">✓</div>
+    <div class="intro-piece piece-7">Tox21</div>
+    <div id="introOverlay">
+    <img id="introLogo" 
+         src="{% static 'images/mainlogo.png' %}" 
+         class="intro-logo-img" alt="Tox21 Logo">
+    </div>
+    <button id="intro-skip-btn">Skip</button>
+
+  </div>
+</div>
+
+
+<div class="home-page main-content">
+
+  <!-- 메인 히어로 영역 ################################################################## -->
+  <section class="main-hero">
+    <div class="floating-labels" id="floatLabels"></div>
+    <canvas id="molCanvas"></canvas>
+    <div class="hero-inner">
+
+      <div class="hero-text-box">
+        <h1>
+          AI로 더 빠르고 정확한<br>
+          <strong>화학물질 독성 예측</strong>
+        </h1>
+
+        <p>
+          기존 데이터 조회와 AI 예측을 하나의 플랫폼에서<br>
+          검색부터 대량 스크리닝까지 쉽고 편리하게 활용하세요.
+        </p>
+        
+        <!-- 검색/CSV 버튼 ################################################################ -->
+        <div class="hero-btn-box">
+          <!-- <a href="{% url 'prediction:search' %}" class="blue-btn">화학물질 검색하기</a> -->
+          <a href="{% url 'predictor:upload_csv' %}" class="white-btn">CSV 스크리닝 시작하기</a>
+        </div>
+      </div>
+
+
+
+    </div>
+  </section>
+
+
+  <!-- 빠른 메뉴 영역 #################################################################### -->
+  <section class="quick-menu-section">
+
+    <a href="{% url 'prediction:search' %}" class="quick-card">
+      <div class="quick-icon">🔎</div>
+      <div>
+        <h3>화학물질 검색</h3>
+      </div>
+      <span>›</span>
+    </a>
+
+    <a href="{% url 'predictor:upload_csv' %}" class="quick-card">
+      <div class="quick-icon green">CSV</div>
+      <div>
+        <h3>CSV 스크리닝</h3>
+      </div>
+      <span>›</span>
+    </a>
+
+    <a href="{% url 'editor:ketcher' %}" class="quick-card">
+    <div class="quick-icon orange">🧬</div>
+    <div>
+      <h3>분자 Editor</h3>
+    </div>
+    <span>›</span>
+  </a>
+
+    {% if user.is_authenticated %}
+      <a href="{% url 'accounts:mypage' %}" class="quick-card">
+        <div class="quick-icon blue">👤</div>
+        <div>
+          <h3>마이페이지</h3>
+          <p>내 정보 확인/변경</p>
+        </div>
+        <span>›</span>
+      </a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" class="quick-card">
+        <div class="quick-icon blue">👤</div>
+        <div>
+          <h3>마이페이지</h3>
+          <p>로그인 후 이용할 수 있습니다</p>
+        </div>
+        <span>›</span>
+      </a>
+    {% endif %}
+
+  </section>
+
+
+  <!-- 최신뉴스 / 부처별자료 영역 ######################################################## -->
+  <section class="main-board-section">
+
+    <!-- 최신 뉴스 ###################################################################### -->
+    <div class="board-card news-board">
+      <div class="board-title-row">
+        <h2>최신 뉴스</h2>
+      </div>
+
+      <!-- 국내뉴스/해외뉴스 탭 -->
+      <div class="tab-menu">
+        <button type="button" id="main-news-domestic" class="active">국내뉴스</button>
+        <button type="button" id="main-news-overseas">해외뉴스</button>
+
+        <!-- 기존 + 버튼 자리에 더보기 -->
+        <a href="{% url 'kpis_view' 'news' %}" class="tab-more-link">더보기 ›</a>
+      </div>
+
+      <!-- 국내뉴스 TOP5 -->
+      <ul class="news-list" id="domestic-news-list">
+        {% for news in domestic_news %}
+        <li>
+          {% if news.lclsfCdNmPrtl == "연구개발" %}
+            <span class="badge blue">{{ news.lclsfCdNmPrtl }}</span>
+          {% elif news.lclsfCdNmPrtl == "산업" %}
+            <span class="badge green">{{ news.lclsfCdNmPrtl }}</span>
+          {% elif news.lclsfCdNmPrtl == "정책" %}
+            <span class="badge orange">{{ news.lclsfCdNmPrtl }}</span>
+          {% elif news.lclsfCdNmPrtl == "기술" %}
+            <span class="badge purple">{{ news.lclsfCdNmPrtl }}</span>
+          {% else %}
+            <span class="badge blue">{{ news.lclsfCdNmPrtl }}</span>
+          {% endif %}
+
+          <a href="{{ news.newsLnkgAddr }}" target="_blank">
+            <p>{{ news.ttlNm|safe }}</p>
+          </a>
+
+          <em>{{ news.pblcnYmd }}</em>
+        </li>
+        {% empty %}
+        <li>
+          <span class="badge blue">안내</span>
+          <p>국내뉴스를 불러오지 못했습니다.</p>
+          <em>-</em>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <!-- 해외뉴스 TOP5 -->
+      <ul class="news-list" id="overseas-news-list" style="display: none;">
+        {% for news in overseas_news %}
+        <li>
+          {% if news.lclsfCdNmPrtl == "연구개발" %}
+            <span class="badge blue">{{ news.lclsfCdNmPrtl }}</span>
+          {% elif news.lclsfCdNmPrtl == "산업" %}
+            <span class="badge green">{{ news.lclsfCdNmPrtl }}</span>
+          {% elif news.lclsfCdNmPrtl == "정책" %}
+            <span class="badge orange">{{ news.lclsfCdNmPrtl }}</span>
+          {% elif news.lclsfCdNmPrtl == "기술" %}
+            <span class="badge purple">{{ news.lclsfCdNmPrtl }}</span>
+          {% else %}
+            <span class="badge blue">{{ news.lclsfCdNmPrtl }}</span>
+          {% endif %}
+
+          <a href="{{ news.newsLnkgAddr }}" target="_blank">
+            <p>{{ news.ttlNm|safe }}</p>
+          </a>
+
+          <em>{{ news.pblcnYmd }}</em>
+        </li>
+        {% empty %}
+        <li>
+          <span class="badge green">안내</span>
+          <p>해외뉴스를 불러오지 못했습니다.</p>
+          <em>-</em>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+
+    <!-- 부처별 자료 #################################################################### -->
+    <div class="board-card policy-board">
+      <div class="board-title-row">
+        <h2>부처별 자료</h2>
+      </div>
+
+      <!-- 정책자료/보도자료 탭 -->
+      <div class="tab-menu">
+        <button type="button" id="policy-data-tab" class="active">정책자료</button>
+        <button type="button" id="press-data-tab">보도자료</button>
+        <a href="{% url 'kpis_view' 'policy' %}" class="policy-more-link">더보기 ›</a>
+      </div>
+
+      <!-- 정책자료 TOP3 -->
+      <div class="policy-card-wrap active-list" id="policy-data-list">
+        {% for item in policy_data %}
+        <a href="{{ item.dataLnkgAddr }}" target="_blank" class="policy-card">
+          {% if item.imgAddr %}
+            <div class="policy-img" style="background-image: url('{{ item.imgAddr }}');"></div>
+          {% else %}
+            <div class="policy-img img1"></div>
+          {% endif %}
+
+          <h3>{{ item.ttlNm|safe }}</h3>
+          <p>{{ item.gvmtMtofNm }}</p>
+          <span>정책자료 바로가기</span>
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- 보도자료 TOP3 -->
+      <div class="policy-card-wrap" id="press-data-list">
+        {% for item in press_data %}
+        <a href="{{ item.dataLnkgAddr }}" target="_blank" class="press-card">
+
+          <h3>{{ item.ttlNm|safe }}</h3>
+
+          <p class="press-summary">
+            {{ item.nscvrgDataCn|striptags|truncatechars:90 }}
+          </p>
+
+          <span class="press-agency">{{ item.gvmtMtofNm }}</span>
+
+          <div class="press-date">
+            {{ item.pstgYmd }}
+          </div>
+
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- 관련 부처 및 기관 ################################################################ -->
+  <section class="partner-section">
+    <h2>관련 부처 및 기관</h2>
+
+    <div class="partner-slider">
+      <div class="partner-track">
+
+        <a href="https://www.krict.re.kr" target="_blank">KRICT 한국화학연구원</a>
+        <a href="https://www.chemnavi.or.kr" target="_blank">한국화학물질관리협회</a>
+        <a href="https://www.me.go.kr" target="_blank">환경부</a>
+        <a href="https://www.mfds.go.kr" target="_blank">식품의약품안전처</a>
+        <a href="https://www.motie.go.kr" target="_blank">산업통상자원부</a>
+        <a href="https://www.msit.go.kr" target="_blank">과학기술정보통신부</a>
+
+        <a href="https://www.krict.re.kr" target="_blank">KRICT 한국화학연구원</a>
+        <a href="https://www.chemnavi.or.kr" target="_blank">한국화학물질관리협회</a>
+        <a href="https://www.me.go.kr" target="_blank">환경부</a>
+        <a href="https://www.mfds.go.kr" target="_blank">식품의약품안전처</a>
+        <a href="https://www.motie.go.kr" target="_blank">산업통상자원부</a>
+        <a href="https://www.msit.go.kr" target="_blank">과학기술정보통신부</a>
+
+      </div>
+    </div>
+
+    <div class="partner-controls">
+      <button type="button" id="partner-prev">←</button>
+      <button type="button" id="partner-next">→</button>
+      <button type="button" id="partner-pause">Ⅱ</button>
+    </div>
+  </section>
+
+
+  <!-- footer ######################################################################### -->
+  <footer class="main-footer">
+    <div>
+      <img src="{% static 'images/mainlogo.png' %}" alt="footer logo">
+      <div>
+        <strong>화학물질 독성예측 플랫폼</strong>
+        <p>© 2026 Toxicity Prediction Platform. All rights reserved.</p>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <a href="{% url 'terms' %}">이용약관</a>
+      <a href="{% url 'privacy' %}">개인정보처리방침</a>
+    </div>
+  </footer>
+
+</div>
+
+
+<!-- 인트로 JS ######################################################################## -->
+<script src="{% static 'js/intro.js' %}"></script>
+
+
+<!-- 메인페이지 탭 / 슬라이드 JS ######################################################## -->
+<script>
+  /* 최신뉴스 국내/해외 탭 전환 */
+  const mainNewsDomestic = document.getElementById("main-news-domestic");
+  const mainNewsOverseas = document.getElementById("main-news-overseas");
+  const domesticNewsList = document.getElementById("domestic-news-list");
+  const overseasNewsList = document.getElementById("overseas-news-list");
+
+  mainNewsDomestic.addEventListener("click", function () {
+    mainNewsDomestic.classList.add("active");
+    mainNewsOverseas.classList.remove("active");
+
+    domesticNewsList.style.display = "block";
+    overseasNewsList.style.display = "none";
+  });
+
+  mainNewsOverseas.addEventListener("click", function () {
+    mainNewsOverseas.classList.add("active");
+    mainNewsDomestic.classList.remove("active");
+
+    domesticNewsList.style.display = "none";
+    overseasNewsList.style.display = "block";
+  });
+
+
+  /* 부처별 자료 정책자료/보도자료 탭 전환 */
+  const policyDataTab = document.getElementById("policy-data-tab");
+  const pressDataTab = document.getElementById("press-data-tab");
+
+  const policyDataList = document.getElementById("policy-data-list");
+  const pressDataList = document.getElementById("press-data-list");
+
+  policyDataTab.addEventListener("click", function () {
+    policyDataTab.classList.add("active");
+    pressDataTab.classList.remove("active");
+
+    policyDataList.classList.add("active-list");
+    pressDataList.classList.remove("active-list");
+  });
+
+  pressDataTab.addEventListener("click", function () {
+    pressDataTab.classList.add("active");
+    policyDataTab.classList.remove("active");
+
+    policyDataList.classList.remove("active-list");
+    pressDataList.classList.add("active-list");
+  });
+
+
+  /* 관련부처 화살표버튼, 정지버튼 기능 */
+  const partnerSlider = document.querySelector(".partner-slider");
+  const partnerTrack = document.querySelector(".partner-track");
+  const partnerPrev = document.getElementById("partner-prev");
+  const partnerNext = document.getElementById("partner-next");
+  const partnerPause = document.getElementById("partner-pause");
+
+  let partnerPaused = false;
+
+  function stopPartnerAnimation() {
+    partnerTrack.style.animation = "none";
+    partnerTrack.style.transform = "none";
+  }
+
+  partnerNext.addEventListener("click", function () {
+    stopPartnerAnimation();
+
+    partnerSlider.scrollBy({
+      left: 260,
+      behavior: "smooth"
+    });
+  });
+
+  partnerPrev.addEventListener("click", function () {
+    stopPartnerAnimation();
+
+    partnerSlider.scrollBy({
+      left: -260,
+      behavior: "smooth"
+    });
+  });
+
+  partnerPause.addEventListener("click", function () {
+    partnerPaused = !partnerPaused;
+
+    if (partnerPaused) {
+      partnerTrack.style.animationPlayState = "paused";
+      partnerPause.textContent = "▶";
+    } else {
+      partnerTrack.style.animation = "";
+      partnerTrack.style.animationPlayState = "running";
+      partnerPause.textContent = "Ⅱ";
+    }
+  });
+</script>
+<!-- 분자 애니메이션 -->
+<script>
+(function() {
+  const section = document.querySelector('.main-hero');
+  const canvas  = document.getElementById('molCanvas');
+  const ctx     = canvas.getContext('2d');
+
+  /* ── 설정값 (여기만 바꾸면 됨) ── */
+  const CHEMICALS   = ['CH₄','C₆H₆','OH⁻','NH₃','CO₂','C₂H₅OH','H₂O₂','C₁₀H₁₄N₂'];
+  const SPAWN_MS    = 1200;
+  const REPEL_R     = 90;
+  const REPEL_FORCE = 28;
+
+  const NODE_DEFS = [
+    { bx:0.62, by:0.45, r:38, speed:0.6, phase:0,          color:'#93b8f5', tox:0.8 },
+    { bx:0.82, by:0.32, r:22, speed:0.9, phase:1.2,        color:'#6da1f0', tox:0.3 },
+    { bx:0.72, by:0.72, r:16, speed:1.1, phase:2.4,        color:'#a8c5f8', tox:0.55},
+    { bx:0.90, by:0.62, r:28, speed:0.7, phase:0.7,        color:'#7ab0f3', tox:0.15},
+    { bx:0.52, by:0.22, r:12, speed:1.3, phase:3.1,        color:'#b8d0fa', tox:0.9 },
+    { bx:0.95, by:0.18, r:10, speed:1.0, phase:1.8,        color:'#c5d9fb', tox:0.4 },
+  ];
+
+  const ORBIT_DEFS = [
+    { nodeIdx:0, rx:0.10, ry:0.07, angle:0,         speed:0.018,  color:'#4a86e8', r:4 },
+    { nodeIdx:0, rx:0.07, ry:0.12, angle:Math.PI/3, speed:-0.022, color:'#2563eb', r:3 },
+    { nodeIdx:1, rx:0.06, ry:0.04, angle:0,         speed:0.028,  color:'#5b8cf5', r:3 },
+    { nodeIdx:3, rx:0.05, ry:0.07, angle:Math.PI/2, speed:-0.032, color:'#3b72f0', r:2.5},
+  ];
+
+  const EDGES = [[0,1],[0,3],[1,3],[1,5],[0,4],[2,3]];
+
+  let mouseX=-999, mouseY=-999, t=0, ripples=[];
+  const orbits = ORBIT_DEFS.map(o => ({...o}));
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = section.offsetWidth  * dpr;
+    canvas.height = section.offsetHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const W = () => section.offsetWidth;
+  const H = () => section.offsetHeight;
+
+  canvas.addEventListener('mousemove', e => {
+    const r=canvas.getBoundingClientRect();
+    mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
+  });
+  canvas.addEventListener('mouseleave', () => { mouseX=-999; mouseY=-999; });
+  canvas.addEventListener('click', e => {
+    const r=canvas.getBoundingClientRect();
+    ripples.push({ x:e.clientX-r.left, y:e.clientY-r.top, radius:0, alpha:0.7 });
+  });
+
+  function toxColor(lv, a) {
+    return lv < 0.5
+      ? `rgba(${Math.round(lv*2*220)},180,80,${a})`
+      : `rgba(220,${Math.round((1-(lv-0.5)*2)*140)},50,${a})`;
+  }
+
+  function drawHexGrid(w, h) {
+    const s=22, hW=s*2, hH=Math.sqrt(3)*s;
+    ctx.strokeStyle='rgba(26,86,219,0.07)'; ctx.lineWidth=0.7;
+    for (let row=-1; row<h/hH+2; row++) {
+      for (let col=-1; col<w/hW+2; col++) {
+        const cx=col*hW+(row%2)*s+w*0.35, cy=row*hH;
+        ctx.beginPath();
+        for (let i=0;i<6;i++){
+          const a=(Math.PI/180)*(60*i-30);
+          i===0?ctx.moveTo(cx+s*Math.cos(a),cy+s*Math.sin(a))
+               :ctx.lineTo(cx+s*Math.cos(a),cy+s*Math.sin(a));
+        }
+        ctx.closePath(); ctx.stroke();
+      }
+    }
+  }
+
+  function draw() {
+    const w=W(), h=H();
+    ctx.clearRect(0,0,w,h);
+
+    ripples = ripples.filter(rp=>rp.alpha>0.01);
+    ripples.forEach(rp=>{
+      for(let ring=0;ring<3;ring++){
+        const rr=rp.radius-ring*22; if(rr<0)continue;
+        ctx.beginPath(); ctx.arc(rp.x,rp.y,rr,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(26,86,219,${rp.alpha*(1-ring*0.28)})`;
+        ctx.lineWidth=1.5-ring*0.4; ctx.stroke();
+      }
+      rp.radius+=3.5; rp.alpha*=0.94;
+    });
+
+    const pos = NODE_DEFS.map(n=>{
+      let px=n.bx*w+Math.sin(t*n.speed+n.phase)*6;
+      let py=n.by*h+Math.cos(t*n.speed*0.7+n.phase)*5;
+      if(mouseX>0){
+        const dx=px-mouseX, dy=py-mouseY, d=Math.hypot(dx,dy);
+        if(d<REPEL_R&&d>0.1){const f=(REPEL_R-d)/REPEL_R; px+=(dx/d)*f*REPEL_FORCE; py+=(dy/d)*f*REPEL_FORCE;}
+      }
+      return {x:px,y:py,r:n.r,color:n.color,tox:n.tox};
+    });
+
+    EDGES.forEach(([i,j]) => {
+      const a=pos[i], b=pos[j], dist=Math.hypot(b.x-a.x, b.y-a.y);
+      if(dist>200) return;
+      const fade = 1-dist/200;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=`rgba(74,134,232,${0.25*fade})`;
+      ctx.lineWidth=1.2;
+      ctx.setLineDash([4,4]); ctx.lineDashOffset=-t*12; ctx.stroke(); ctx.setLineDash([]);
+      const prog=(t*0.4+(i+j)*0.5)%1;
+      ctx.beginPath();
+      ctx.arc(a.x+(b.x-a.x)*prog, a.y+(b.y-a.y)*prog, 2.5, 0, Math.PI*2);
+      ctx.fillStyle=`rgba(30,100,220,${0.55*fade})`; ctx.fill();
+    });
+
+    if(mouseX>0){
+      pos.forEach(p=>{
+        const d=Math.hypot(p.x-mouseX,p.y-mouseY);
+        if(d<160){ctx.beginPath();ctx.moveTo(mouseX,mouseY);ctx.lineTo(p.x,p.y);
+          ctx.strokeStyle=`rgba(26,86,219,${0.18*(1-d/160)})`;ctx.lineWidth=0.8;ctx.stroke();}
+      });
+      ctx.beginPath();ctx.arc(mouseX,mouseY,5,0,Math.PI*2);ctx.fillStyle='rgba(26,86,219,0.5)';ctx.fill();
+      ctx.beginPath();ctx.arc(mouseX,mouseY,14,0,Math.PI*2);ctx.strokeStyle='rgba(26,86,219,0.2)';ctx.lineWidth=1;ctx.stroke();
+    }
+
+    pos.forEach(p=>{
+      const g=ctx.createRadialGradient(p.x-p.r*.3,p.y-p.r*.3,p.r*.1,p.x,p.y,p.r);
+      g.addColorStop(0,p.color+'FF'); g.addColorStop(0.6,p.color+'CC'); g.addColorStop(1,p.color+'44');
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+      ctx.strokeStyle='rgba(26,86,219,0.2)';ctx.lineWidth=0.8;ctx.stroke();
+    });
+
+    orbits.forEach(o=>{
+      o.angle+=o.speed;
+      const base=pos[o.nodeIdx];
+      const ex=base.x+Math.cos(o.angle)*o.rx*w, ey=base.y+Math.sin(o.angle)*o.ry*h;
+      ctx.beginPath();ctx.ellipse(base.x,base.y,o.rx*w,o.ry*h,0,0,Math.PI*2);
+      ctx.strokeStyle='rgba(74,134,232,0.1)';ctx.lineWidth=0.8;ctx.stroke();
+      ctx.beginPath();ctx.arc(ex,ey,o.r,0,Math.PI*2);ctx.fillStyle=o.color+'DD';ctx.fill();
+    });
+
+    t+=0.016;
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  /* 떠다니는 화학식 */
+  const floatBox = document.getElementById('floatLabels');
+  function spawnLabel(){
+    const el=document.createElement('div');
+    el.className='chem-label';
+    el.textContent=CHEMICALS[Math.floor(Math.random()*CHEMICALS.length)];
+    el.style.left=(30+Math.random()*60)+'%';
+    el.style.bottom=(Math.random()*60)+'%';
+    el.style.animationDuration=(4+Math.random()*4)+'s';
+    floatBox.appendChild(el);
+    setTimeout(()=>el.remove(),9000);
+  }
+  setInterval(spawnLabel, SPAWN_MS);
+  spawnLabel(); spawnLabel(); spawnLabel();
+})();
+</script>
+{% endblock %}

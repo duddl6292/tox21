@@ -1,0 +1,114 @@
+{% extends "predictor/predictor_base.html" %}
+
+{% block predictor_content %}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">Tox21 DB 검색</h2>
+        <p class="text-muted">
+            Tox21 데이터베이스에 저장된 화합물명을 검색할 수 있습니다.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-10">
+                    <input type="text"
+                           name="q"
+                           class="form-control"
+                           placeholder="예: aspirin, benzene, CCO"
+                           value="{{ query }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        검색
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if query %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">
+                    검색 결과
+                    <span class="text-muted small">"{{ query }}"</span>
+                </h5>
+
+                {% if molecules %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>구조</th>
+                                    <th>이름</th>
+                                    <th>SMILES</th>
+                                    <th class="text-center">NR-ER</th>
+                                    <th class="text-center">SR-p53</th>
+                                    <th class="text-center">분석</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for mol in molecules %}
+                                    <tr>
+                                        <td style="width: 120px;">
+                                            <img src="{% url 'predictor:molecule_structure_image' mol.id %}"
+                                                 alt="structure"
+                                                 style="max-width: 100px; max-height: 80px;">
+                                        </td>
+
+                                        <td>
+                                            {% if mol.name %}
+                                                <strong>{{ mol.name }}</strong>
+                                            {% else %}
+                                                <span class="text-muted">이름 없음</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            <code>{{ mol.smiles|truncatechars:60 }}</code>
+                                        </td>
+
+                                        <td class="text-center">
+                                            {% if mol.nr_er is None %}
+                                                <span class="text-muted">-</span>
+                                            {% else %}
+                                                {{ mol.nr_er }}
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {% if mol.sr_p53 is None %}
+                                                <span class="text-muted">-</span>
+                                            {% else %}
+                                                {{ mol.sr_p53 }}
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-center">
+                                            <a href="{% url 'predictor:single_analyze' %}?q={{ mol.smiles|urlencode }}&mode=smiles"
+                                               class="btn btn-sm btn-outline-primary">
+                                                분석하기
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        검색 결과가 없습니다.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

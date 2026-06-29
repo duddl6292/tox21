@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+  {% if user.is_staff %}
+  <h2>화학식 관리</h2>
+  <p class="sub-text">관리자만 화학식 데이터를 등록, 수정, 삭제할 수 있습니다.</p>
+
+  <a href="{% url 'chemicals:chemical_new' %}" class="btn">화학식 추가</a>
+  <a href="{% url 'chemicals:chemical_csv_upload' %}" class="btn btn-gray">CSV 업데이트</a>
+
+  <br><br>
+  {% endif %}
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>화학물질명</th>
+      <th>화학식</th>
+      <th>SMILES</th>
+      <th>독성 결과</th>
+      {% if user.is_staff %}
+      <th>관리</th>
+      {% endif %}
+    </tr>
+
+    {% for chemical in chemicals %}
+    <tr>
+      <td>{{ chemical.id }}</td>
+      <td>{{ chemical.name }}</td>
+      <td>{{ chemical.formula }}</td>
+      <td>{{ chemical.smiles }}</td>
+      <td>{{ chemical.toxicity }}</td>
+      {% if user.is_staff %}
+      <td>
+        <a href="{% url 'chemicals:chemical_edit' chemical.pk %}" class="btn table-btn">수정</a>
+        <a href="{% url 'chemicals:chemical_delete' chemical.pk %}" class="btn table-btn-danger">삭제</a>
+      </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+/* ==========================================================
+   TOX SEARCH 관리자 Dashboard
+
+   Django Admin + Jazzmin 기반
+
+
+   ※ dashboard.css
+   ※ Dashboard 전용 스타일
+
+========================================================== */
+
+
+/* ==========================================================
+   SECTION 1
+   관리자 환영 메시지
+========================================================== */
+
+.dashboard-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:18px;
+
+    margin-bottom:30px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+
+/* 환영 문구 */
+
+.dashboard-header h2{
+
+    margin:0;
+
+    font-size:30px;
+
+    font-weight:bold;
+
+}
+
+
+/* 설명 문구 */
+
+.dashboard-header p{
+
+    margin-top:10px;
+
+    color:#666;
+
+    font-size:16px;
+
+}
+
+/* ==========================================================
+   SECTION 1
+   시스템 상태 영역
+========================================================== */
+
+.dashboard-status{
+
+    text-align:right;
+
+}
+
+.status{
+
+    display:block;
+
+    font-weight:bold;
+
+    color:#2E7D32;
+
+    margin-bottom:10px;
+
+}
+
+.today{
+
+    color:#666;
+
+}
+
+/* ==========================================================
+   SECTION 2
+   Dashboard 카드 영역
+========================================================== */
+
+.dashboard-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:20px;
+
+    margin-bottom:35px;
+
+}
+
+
+/* 공통 카드 */
+
+.dashboard-card{
+
+    color:white;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    transition:.3s;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+}
+
+
+/* 카드 마우스 효과 */
+
+.dashboard-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+
+/* 카드 제목 */
+
+.dashboard-card h3{
+
+    margin-bottom:15px;
+
+}
+
+
+/* 카드 숫자 */
+
+.dashboard-card h1{
+
+    font-size:42px;
+
+    margin:0;
+
+}
+
+
+/* 카드 설명 */
+
+.dashboard-card small{
+
+    opacity:.9;
+
+}
+
+
+/* ==========================================================
+   카드 색상
+========================================================== */
+
+.blue{
+
+    background:linear-gradient(135deg,#1976D2,#42A5F5);
+
+}
+
+.green{
+
+    background:linear-gradient(135deg,#2E7D32,#66BB6A);
+
+}
+
+.orange{
+
+    background:linear-gradient(135deg,#F57C00,#FFB74D);
+
+}
+
+.purple{
+
+    background:linear-gradient(135deg,#7B1FA2,#BA68C8);
+
+}

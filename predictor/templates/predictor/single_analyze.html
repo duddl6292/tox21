@@ -1,0 +1,184 @@
+{% extends "predictor/predictor_base.html" %}
+
+{% block predictor_content %}
+<style>
+    .analyze-submit-btn {
+    height: 42px;
+    min-width: 170px;
+    padding: 0 28px;
+
+    border: 1px solid #1f3a5f;
+    border-radius: 9px;
+
+    background-color: #1f3a5f;
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+
+    cursor: pointer;
+    white-space: nowrap;
+
+    box-shadow: 0 4px 10px rgba(31, 58, 95, 0.18);
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+}
+
+.analyze-submit-btn:hover {
+    background-color: #172c47;
+    border-color: #172c47;
+    box-shadow: 0 6px 14px rgba(31, 58, 95, 0.24);
+    transform: translateY(-1px);
+}
+
+.analyze-submit-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(31, 58, 95, 0.18);
+}
+</style>
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">단일 화합물 분석</h2>
+        <p class="text-muted">
+            화합물명 또는 SMILES를 입력하면 NR-ER 및 SR-p53 독성 위험도를 분석합니다.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-7">
+                        <label class="form-label fw-semibold">화합물명 또는 SMILES</label>
+                        <input type="text"
+                               name="compound_input"
+                               class="form-control"
+                               placeholder="예: aspirin 또는 CCO"
+                               value="{{ compound_input }}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">입력 방식</label>
+                        <select name="input_mode" class="form-select">
+                            <option value="auto" {% if input_mode == "auto" %}selected{% endif %}>자동 판단</option>
+                            <option value="name" {% if input_mode == "name" %}selected{% endif %}>화합물명</option>
+                            <option value="smiles" {% if input_mode == "smiles" %}selected{% endif %}>SMILES</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="analyze-submit-btn">
+                            분석하기
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                <h4 class="fw-bold mb-3">분석 결과</h4>
+
+                <div class="mb-3">
+                    {% if result.resolved_name %}
+                        <h5 class="fw-bold">{{ result.resolved_name }}</h5>
+                    {% elif result.input_name %}
+                        <h5 class="fw-bold">{{ result.input_name }}</h5>
+                    {% else %}
+                        <h5 class="fw-bold">입력 화합물</h5>
+                    {% endif %}
+
+                    {% if result.input_smiles %}
+                        <div class="text-muted small">
+                            SMILES: <code>{{ result.input_smiles }}</code>
+                        </div>
+                    {% endif %}
+
+                    {% if result.canonical_smiles %}
+                        <div class="text-muted small">
+                            Canonical SMILES: <code>{{ result.canonical_smiles }}</code>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if result.is_valid %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h5 class="fw-bold">NR-ER</h5>
+
+                                <p class="mb-1">
+                                    Source:
+                                    {% if result.nr_er_source == "DB" %}
+                                        <span class="badge bg-primary">DB</span>
+                                    {% elif result.nr_er_source == "ML" %}
+                                        <span class="badge bg-secondary">ML</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ result.nr_er_source }}</span>
+                                    {% endif %}
+                                </p>
+
+                                <p class="mb-1">Result: {{ result.nr_er_result }}</p>
+
+                                {% if result.nr_er_prob is not None %}
+                                    <p class="mb-1">Probability: {{ result.nr_er_prob|floatformat:4 }}</p>
+                                {% endif %}
+
+                                <p class="mb-0">
+                                    Risk:
+                                    <strong>{{ result.nr_er_risk }}</strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h5 class="fw-bold">SR-p53</h5>
+
+                                <p class="mb-1">
+                                    Source:
+                                    {% if result.sr_p53_source == "DB" %}
+                                        <span class="badge bg-primary">DB</span>
+                                    {% elif result.sr_p53_source == "ML" %}
+                                        <span class="badge bg-secondary">ML</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ result.sr_p53_source }}</span>
+                                    {% endif %}
+                                </p>
+
+                                <p class="mb-1">Result: {{ result.sr_p53_result }}</p>
+
+                                {% if result.sr_p53_prob is not None %}
+                                    <p class="mb-1">Probability: {{ result.sr_p53_prob|floatformat:4 }}</p>
+                                {% endif %}
+
+                                <p class="mb-0">
+                                    Risk:
+                                    <strong>{{ result.sr_p53_risk }}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger">
+                        {{ result.message|linebreaksbr }}
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

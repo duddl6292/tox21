@@ -1,0 +1,268 @@
+{% extends "predictor/predictor_base.html" %}
+{% load static %}
+
+{% block predictor_content %}
+
+<style>
+    .upload-page {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .page-title {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .page-desc {
+        color: #555;
+        margin-bottom: 24px;
+    }
+
+    .upload-card {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .upload-box {
+        border: 2px dashed #ced4da;
+        border-radius: 14px;
+        padding: 28px;
+        background-color: #fafafa;
+        text-align: center;
+    }
+
+    .upload-box:hover {
+        border-color: #0d6efd;
+        background-color: #f5f9ff;
+    }
+
+    .info-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+        height: 100%;
+    }
+
+    .code-box {
+        background-color: #212529;
+        color: #f8f9fa;
+        border-radius: 12px;
+        padding: 18px;
+        font-family: Consolas, monospace;
+        font-size: 14px;
+        white-space: pre-line;
+    }
+
+    .badge-db {
+        background-color: #0d6efd;
+    }
+
+    .badge-ml {
+        background-color: #198754;
+    }
+
+    .risk-low {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .risk-mid {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+
+    .risk-high {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .section-title {
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+    .csv-analyze-btn {
+    height: 42px;
+    min-width: 120px;
+    padding: 0 24px;
+
+    border: 1px solid #1f3a5f;
+    border-radius: 9px;
+
+    background-color: #1f3a5f;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 10px rgba(31, 58, 95, 0.18);
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+    }
+
+    .csv-analyze-btn:hover {
+        background-color: #172c47;
+        border-color: #172c47;
+        box-shadow: 0 6px 14px rgba(31, 58, 95, 0.24);
+        transform: translateY(-1px);
+    }
+
+    .csv-analyze-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(31, 58, 95, 0.18);
+    }
+</style>
+
+<div class="container upload-page mt-4">
+
+    <!-- 제목 영역 -->
+    <div class="mb-4">
+        <h2 class="page-title">CSV 기반 대량 독성 분석</h2>
+        <p class="page-desc">
+            SMILES 컬럼이 포함된 CSV 파일을 업로드하면
+            Tox21 DB 조회 또는 FFNN 모델 예측을 통해
+            NR-ER 및 SR-p53 위험도를 분석합니다.
+        </p>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- 업로드 카드 -->
+    <div class="card upload-card mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="section-title">파일 업로드</h5>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="upload-box mb-3">
+                    <p class="mb-2 fw-semibold">
+                        분석할 CSV 파일을 선택하세요
+                    </p>
+
+                    <p class="text-muted small mb-3">
+    CSV 파일에는 <strong>smiles</strong> 또는 <strong>name</strong> 컬럼이 포함되어야 합니다.
+</p>
+
+                    <div class="mb-3">
+                        {{ form.csv_file }}
+                    </div>
+
+                    <button type="submit" class="csv-analyze-btn">
+                        분석하기
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- 안내 카드 영역 -->
+    <div class="row g-4">
+
+        <!-- 분석 방식 안내 -->
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-body p-4">
+                    <h5 class="section-title">분석 방식</h5>
+
+                    <p class="mb-2">
+                        <span class="badge badge-db">DB</span>
+                        기존 Tox21 데이터에 존재하는 화합물은 실제 라벨을 출력합니다.
+                    </p>
+
+                    <p class="mb-3">
+                        <span class="badge badge-ml">ML</span>
+                        DB에 없는 신규 화합물은 FFNN 모델로 예측합니다.
+                    </p>
+
+                    <hr>
+
+                    <h6 class="fw-bold mb-2">위험도 기준</h6>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge risk-low px-3 py-2">저위험: 0.0 ~ 0.3</span>
+                        <span class="badge risk-mid px-3 py-2">중위험: 0.3 ~ 0.7</span>
+                        <span class="badge risk-high px-3 py-2">고위험: 0.7 ~ 1.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSV 예시 -->
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-body p-4">
+                    <h5 class="section-title">입력 CSV 예시</h5>
+
+                    <div class="table-responsive">
+            <table class="table table-bordered align-middle example-table">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 20%;">name</th>
+                        <th style="width: 45%;">smiles</th>
+                        <th style="width: 35%;">설명</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ethanol</td>
+                        <td>CCO</td>
+                        <td><span class="badge bg-primary">이름 + SMILES</span></td>
+                    </tr>
+                    <tr>
+                        <td>benzene</td>
+                        <td>c1ccccc1</td>
+                        <td><span class="badge bg-primary">이름 + SMILES</span></td>
+                    </tr>
+                    <tr>
+                        <td>aspirin</td>
+                        <td></td>
+                        <td><span class="badge bg-success">이름만 입력</span></td>
+                    </tr>
+                    <tr>
+                        <td>caffeine</td>
+                        <td></td>
+                        <td><span class="badge bg-success">이름만 입력</span></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>CC(=O)Oc1ccccc1C(=O)O</td>
+                        <td><span class="badge bg-warning text-dark">SMILES만 입력</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+<p class="text-muted small mt-3 mb-0">
+    CSV 파일에는 <strong>smiles</strong> 또는 <strong>name</strong> 컬럼이 필요합니다.<br>
+    두 컬럼이 모두 있는 경우 <strong>smiles</strong> 값을 우선 사용하고,
+    <strong>smiles</strong>가 비어 있으면 <strong>name</strong>을 PubChem API로 SMILES 변환합니다.
+</p>
+
+<p class="text-muted small mt-3 mb-0">
+    잘못된 <strong>name</strong>, <strong>smiles</strong>가 포함된 경우 해당 행은 “<strong>분석불가</strong>”로 표시됩니다.
+</p>
+
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

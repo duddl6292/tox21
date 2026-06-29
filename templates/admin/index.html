@@ -1,0 +1,139 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+
+<!-- Dashboard 전용 CSS -->
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ==========================================================
+     TOX SEARCH 관리자 Dashboard
+     Django Admin + Jazzmin 기반
+
+     목적
+     - 관리자 메인 화면 커스터마이징
+     - 기존 Admin 기능 유지
+
+=========================================================== -->
+
+
+
+<!-- ==========================================================
+     SECTION 1
+     관리자 환영 메시지
+=========================================================== -->
+
+<div class="dashboard-header">
+
+    <!-- 왼쪽 : 환영 메시지 -->
+    <div>
+
+        <h2>👋 안녕하세요, 관리자님!</h2>
+
+        <p>
+            오늘도 AI 기반 화학물질 독성예측 플랫폼을
+            안전하게 관리해보세요.
+        </p>
+
+    </div>
+
+
+    <!-- 오른쪽 : 시스템 상태 -->
+    <div class="dashboard-status">
+
+        <span class="status">
+            🟢 System Online
+        </span>
+
+        <span class="today">
+            📅 {% now "Y.m.d" %}
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================================
+     SECTION 2
+     Dashboard 통계 카드
+
+     ※DB 값과 연동함 
+
+=========================================================== -->
+
+<div class="dashboard-grid">
+
+
+    <!-- 회원 수 -->
+
+    <div class="dashboard-card blue">
+
+        <h3>👤 회원 수</h3>
+
+        <h1>{{ user_count }}</h1> 
+
+        <small>{{ user_count }}</small>
+
+    </div>
+
+
+    <!-- 화학물질 --> 
+
+    <div class="dashboard-card green">
+
+        <h3>🧪 화학물질 </h3>
+
+        <h1>{{ chemical_count }}</h1>
+
+        <small>{{ chemical_count }}</small>
+
+    </div>
+
+
+    <!-- CSV -->
+
+    <div class="dashboard-card orange">
+
+        <h3>📂 CSV 업로드 </h3>
+
+        <h1>{{ csv_count }}</h1>
+
+        <small>{{ csv_count }}</small>
+
+    </div>
+
+
+    <!-- 머신러닝 모델 예측 -->
+
+    <div class="dashboard-card purple">
+
+        <h3>🤖 ML 예측</h3>
+
+        <h1>{{ predict_count }}</h1>
+
+        <small>{{ predict_count }}</small>
+
+    </div>
+
+
+</div>
+
+
+<!-- ==========================================================
+     기존 Django Admin Dashboard
+
+     ※ 절대 삭제하지 말 것
+     ※ Django Admin 기능 유지
+
+=========================================================== -->
+
+{{ block.super }}
+
+{% endblock %}

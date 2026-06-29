@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card small-card">
+  <h2>회원 상세정보</h2>
+
+  <div class="detail-box">
+    <p><b>아이디</b> {{ user_obj.username }}</p>
+    <p><b>이메일</b> {{ user_obj.email }}</p>
+    <p><b>전화번호</b> {{ profile.phone }}</p>
+    <p><b>소속</b> {{ profile.company }}</p>
+    <p><b>주소</b> {{ profile.address }}</p>
+    <p><b>가입일</b> {{ user_obj.date_joined|date:"Y-m-d H:i" }}</p>
+  </div>
+
+  <a href="{% url 'accounts:admin_user_update' user_obj.pk %}" class="btn">수정</a>
+  <a href="{% url 'accounts:admin_password_reset' user_obj.pk %}" class="btn btn-gray">비밀번호 초기화</a>
+  <a href="{% url 'accounts:admin_user_delete' user_obj.pk %}" class="btn btn-danger">삭제</a>
+  <a href="{% url 'accounts:admin_user_list' %}" class="btn btn-outline">목록</a>
+</div>
+{% endblock %}

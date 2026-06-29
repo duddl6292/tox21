@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card small-card">
+  <h2>화학식 입력/수정</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn full-btn">저장</button>
+    <a href="{% url 'chemicals:chemical_list' %}" class="btn btn-gray">목록</a>
+  </form>
+</div>
+{% endblock %}

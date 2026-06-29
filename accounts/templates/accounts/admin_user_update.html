@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card small-card">
+  <h2>회원 정보 수정</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- User Form -->
+    {% for field in user_form %}
+      <p>
+        <label for="{{ field.id_for_label }}">
+          {{ field.label }}
+          {% if field.field.required %}
+            <span class="required-text">*필수</span>
+          {% endif %}
+        </label><br>
+
+        {{ field }}
+
+        {% if field.errors %}
+          <span class="error-text">{{ field.errors }}</span>
+        {% endif %}
+      </p>
+    {% endfor %}
+
+    <!-- Profile Form -->
+    {% for field in profile_form %}
+      <p>
+        <label for="{{ field.id_for_label }}">
+          {{ field.label }}
+          {% if field.field.required %}
+            <span class="required-text">*필수</span>
+          {% endif %}
+        </label><br>
+
+        {{ field }}
+
+        {% if field.errors %}
+          <span class="error-text">{{ field.errors }}</span>
+        {% endif %}
+      </p>
+    {% endfor %}
+
+    <button type="submit" class="btn full-btn">수정 저장</button>
+  </form>
+</div>
+
+<style>
+.required-text {
+  color: red;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.error-text {
+  display: block;
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+}
+</style>
+{% endblock %}

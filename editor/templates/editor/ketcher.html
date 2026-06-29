@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+body{
+    margin:0;
+    padding:20px;
+    background:#f5f7fb;
+    font-family:Arial,sans-serif;
+}
+
+.ketcher-box{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+#ketcherFrame{
+    width:100%;
+    height:720px;
+    border:none;
+    display:block;
+}
+
+/* ========================= */
+/* 하단 영역 */
+/* ========================= */
+
+.bottom-control{
+    margin-top:15px;
+
+    display:flex;
+    align-items:center;
+    gap:15px;
+
+    padding:15px;
+
+    background:#fff;
+
+    border:1px solid #ddd;
+    border-radius:10px;
+
+    flex-wrap:wrap;
+}
+
+.formula-output{
+    flex:1;
+
+    min-width:260px;
+    height:48px;
+
+    border:1px solid #d6d6d6;
+    border-radius:8px;
+
+    display:flex;
+    align-items:center;
+
+    padding:0 15px;
+
+    font-size:15px;
+
+    font-family:monospace;
+
+    color:#555;
+
+    overflow-x:auto;
+    white-space:nowrap;
+}
+
+.editor-btn{
+    height:48px;
+
+    padding:0 22px;
+
+    border-radius:8px;
+
+    font-size:15px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    white-space:nowrap;
+}
+
+.editor-btn:hover{
+    transform:translateY(-1px);
+}
+
+.btn-blue{
+    background:#3478f6;
+    color:white;
+
+    border:none;
+}
+
+.btn-white{
+    background:white;
+    color:#3478f6;
+
+    border:1px solid #3478f6;
+}
+
+.btn-login{
+    background:white;
+
+    border:1px solid #ccc;
+}
+
+.logout-form{
+    margin:0;
+}
+</style>
+
+<div class="ketcher-box">
+
+    <iframe
+        id="ketcherFrame"
+        src="{% static 'editor/ketcher/index.html' %}">
+    </iframe>
+
+</div>
+
+<div class="bottom-control">
+
+    <div id="outputBox" class="formula-output">
+        출력
+    </div>
+
+    <button
+        type="button"
+        class="editor-btn btn-white"
+        onclick="downloadPng()">
+        PNG 다운로드 {% if not user.is_authenticated %}🔒{% endif %}
+    </button>
+
+    <button
+        type="button"
+        class="editor-btn btn-blue"
+        onclick="showSmiles()">
+        SMILES 출력
+    </button>
+
+    <button
+        type="button"
+        class="editor-btn btn-white"
+        onclick="showFormula()">
+        화학식 출력
+    </button>
+
+    {% if user.is_authenticated %}
+        <form
+            method="post"
+            action="{% url 'accounts:logout' %}"
+            class="logout-form">
+            {% csrf_token %}
+
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+            <button
+                type="submit"
+                class="editor-btn btn-login">
+                로그아웃
+            </button>
+        </form>
+    {% else %}
+        <button
+            type="button"
+            class="editor-btn btn-login"
+            onclick="goLogin()">
+            로그인
+        </button>
+    {% endif %}
+
+</div>
+
+<script>
+async function getKetcher(){
+    const frame = document.getElementById("ketcherFrame");
+
+    if(!frame || !frame.contentWindow){
+        return null;
+    }
+
+    return frame.contentWindow.ketcher;
+}
+
+async function showSmiles(){
+    const ketcher = await getKetcher();
+
+    if(!ketcher){
+        alert("Ketcher가 아직 로딩되지 않았습니다.");
+        return;
+    }
+
+    try{
+        const smiles = await ketcher.getSmiles();
+
+        if(!smiles){
+            document.getElementById("outputBox").innerText = "분자 구조가 없습니다.";
+            return;
+        }
+
+        document.getElementById("outputBox").innerText = smiles;
+    }
+    catch(error){
+        console.error(error);
+        alert("SMILES 출력 실패");
+    }
+}
+
+async function showFormula(){
+    const ketcher = await getKetcher();
+
+    if(!ketcher){
+        alert("Ketcher가 아직 로딩되지 않았습니다.");
+        return;
+    }
+
+    try{
+        const smiles = await ketcher.getSmiles();
+
+        if(!smiles){
+            alert("분자 구조가 없습니다.");
+            return;
+        }
+
+        const response = await fetch("{% url 'editor:get_formula' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                smiles: smiles
+            })
+        });
+
+        const data = await response.json();
+
+        if(data.error){
+            alert(data.error);
+            return;
+        }
+
+        document.getElementById("outputBox").innerText = data.formula;
+    }
+    catch(error){
+        console.error(error);
+        alert("화학식 출력 실패");
+    }
+}
+
+async function downloadPng(){
+    {% if not user.is_authenticated %}
+        alert("PNG 다운로드는 로그인 후 이용 가능합니다.");
+        return;
+    {% endif %}
+
+    const ketcher = await getKetcher();
+
+    if(!ketcher){
+        alert("Ketcher가 아직 로딩되지 않았습니다.");
+        return;
+    }
+
+    try{
+        const smiles = await ketcher.getSmiles();
+
+        if(!smiles){
+            alert("분자 구조가 없습니다.");
+            return;
+        }
+
+        const response = await fetch("{% url 'editor:download_png' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                smiles: smiles
+            })
+        });
+
+        if(!response.ok){
+            const data = await response.json();
+            alert(data.error || "PNG 다운로드 실패");
+            return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "molecule.png";
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    }
+    catch(error){
+        console.error(error);
+        alert("PNG 다운로드 실패");
+    }
+}
+
+function goLogin(){
+    location.href = "{% url 'accounts:login' %}?next={{ request.path }}";
+}
+</script>
+
+{% endblock content %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card small-card">
+  <h2>화학식 삭제</h2>
+
+  <p>
+    <b>{{ chemical.name }}</b> 데이터를 삭제하시겠습니까?
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">삭제</button>
+    <a href="{% url 'chemicals:chemical_list' %}" class="btn btn-gray">취소</a>
+  </form>
+</div>
+{% endblock %}
